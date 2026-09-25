@@ -1,4 +1,4 @@
-namespace ApexBank.Models
+﻿namespace ApexBank.Models
 {
     public class ErrorViewModel
     {

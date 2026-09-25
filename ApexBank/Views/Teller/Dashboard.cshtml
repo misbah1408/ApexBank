@@ -1,0 +1,56 @@
+<h1 class="text-3xl font-bold mb-6">Teller Dashboard</h1>
+<div class="grid lg:grid-cols-2 gap-6">
+	<section class="bg-slate-900 p-5 rounded-xl">
+		<h2 class="font-bold mb-4">Pending Customer Registrations</h2>@foreach(var u in
+		(IEnumerable<User>)ViewBag.Registrations){
+			<div class="border-b border-slate-800 py-3">
+				<b>@u.Name</b>
+				<p class="text-sm text-slate-400">@u.Email · DOB @u.DateOfBirth.ToShortDateString()</p>
+				<form method="post" action="/Teller/ApproveCustomer" class="mt-2">
+					<button name="id" value="@u.Id" class="bg-emerald-600 px-3 py-1 rounded">Approve</button>
+				</form>
+			</div>
+		}
+		@if (!((IEnumerable<User>)ViewBag.Registrations).Any())
+		{
+			<p class="text-slate-500">
+				No pending
+				registrations.
+			</p>
+		}
+	</section>
+	<section class="bg-slate-900 p-5 rounded-xl">
+		<h2 class="font-bold mb-4">Deposit / Withdrawal Requests</h2>@foreach(var t in
+		(IEnumerable<Transaction>)ViewBag.Requests){
+			<div class="border-b border-slate-800 py-3">
+				<b>
+					@t.Type ·
+					@t.Account.AccountNumber
+				</b>
+				<p>₹@t.Amount.ToString("N2")</p>
+				<form method="post" action="/Teller/RequestDecision" class="inline">
+					<input type="hidden" name="id" value="@t.Id" />
+					<input type="hidden" name="approve" value="true" />
+					<button class="bg-emerald-600 px-3 py-1 rounded mr-2">Approve</button>
+				</form>
+				<form method="post" action="/Teller/RequestDecision" class="inline">
+					<input type="hidden" name="id" value="@t.Id" />
+					<input type="hidden" name="approve" value="false" />
+					<button class="bg-red-600 px-3 py-1 rounded">Reject</button>
+				</form>
+			</div>
+		}
+	</section>
+</div>
+<section class="bg-slate-900 p-5 rounded-xl mt-6">
+	<h2 class="font-bold mb-4">Counter Transaction</h2>
+	<form method="post" action="/Teller/Counter" class="grid md:grid-cols-4 gap-3">
+		<input name="AccountNumber" placeholder="Account number" class="p-2 bg-slate-800 rounded" />
+		<select name="Type" class="p-2 bg-slate-800 rounded">
+			<option>Deposit</option>
+			<option>Withdrawal</option>
+		</select>
+		<input name="Amount" type="number" step="0.01" placeholder="Amount" class="p-2 bg-slate-800 rounded" />
+		<button class="bg-blue-600 rounded">Execute</button>
+	</form>
+</section>
