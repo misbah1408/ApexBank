@@ -1,0 +1,229 @@
+@using ApexBank.Enums
+@model IEnumerable<ApexBank.Models.Loan>
+
+<h1 class="text-3xl font-bold mb-6">Loan Officer · Underwriting Queue</h1>
+<div id="view-officer" class="role-view space-y-6">
+	<div class="bg-slate-800 p-6 rounded-2xl border border-slate-700">
+		<div class="flex justify-between items-center mb-4">
+			<h2 class="text-lg font-bold flex items-center gap-2">
+				<i class="fa-solid fa-scale-balanced text-amber-400"></i> Underwriting Queue (Pending Approvals)
+			</h2>
+			<span class="bg-amber-500/20 text-amber-400 text-xs px-3 py-1 rounded-full font-semibold">
+				@Model.Count() Pending Applications
+			</span>
+		</div>
+
+		<div class="overflow-x-auto">
+			<table class="w-full text-left text-xs">
+				<thead class="bg-slate-900 text-slate-400 border-b border-slate-700">
+					<tr>
+						<th class="p-3">Applicant</th>
+						<th class="p-3">Category</th>
+						<th class="p-3">Amount</th>
+						<th class="p-3">Tenure</th>
+						<th class="p-3">Collateral Metrics</th>
+						<th class="p-3">Action</th>
+					</tr>
+				</thead>
+				<tbody class="divide-y divide-slate-700/50">
+					@foreach (var l in Model)
+					{
+						var rowClass = l.LoanType == LoanType.Gold
+								? "bg-yellow-500/20 text-yellow-400"
+								: l.LoanType == LoanType.Home
+								? "bg-blue-500/20 text-blue-400"
+								: l.LoanType == LoanType.Personal
+								? "bg-purple-500/20 text-purple-400"
+								: "bg-green-500/20 text-green-400";
+						<tr>
+							<td class="p-3 font-semibold">@l.CustomerProfile.User.Name</td>
+							<td class="p-3">
+								<span class="px-2 py-0.5 rounded font-semibold @rowClass">@l.LoanType</span>
+							</td>
+							<td class="p-3 font-bold">₹@l.PrincipalAmount.ToString("N2")</td>
+							<td class="p-3 font-bold">@l.TenureMonths months</td>
+							<td class="p-3 text-slate-400 max-w-96 text-wrap truncate overflow-hidden">
+								@if (l.CollateralDetails == null)
+								{
+									<span>no details available</span>
+								}
+								else
+								{
+									@l.CollateralDetails
+								}
+							</td>
+							<td class="p-3">
+								<div class="flex flex-col gap-2">
+									<button onclick="openVerificationModal(@l.Id)"
+											class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded flex items-center justify-center gap-1.5 font-semibold">
+										<i class="fa-solid fa-wand-magic-sparkles"></i> Verify & AI Risk
+									</button>
+									<div class="flex gap-2">
+										<form method="post" action="/LoanOfficer/Approve" class="flex gap-1">
+											<input type="hidden" name="id" value="@l.Id" />
+											<input name="interestRate" value="10" type="number" step="0.01"
+												   class="w-16 p-1 bg-slate-900 rounded border border-slate-700 text-center" />
+											<button
+												class="bg-emerald-600 hover:bg-emerald-500 px-2 py-1 rounded font-semibold">
+												Approve
+											</button>
+										</form>
+										<form method="post" action="/LoanOfficer/Reject" class="flex gap-1">
+											<input type="hidden" name="id" value="@l.Id" />
+											<input name="reason" placeholder="Reason"
+												   class="w-20 p-1 bg-slate-900 rounded border border-slate-700" />
+											<button class="bg-red-600 hover:bg-red-500 px-2 py-1 rounded font-semibold">
+												Reject
+											</button>
+										</form>
+									</div>
+								</div>
+							</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		</div>
+	</div>
+</div>
+
+<!-- Modal Verification & AI Compiler -->
+<div id="verifyModal"
+	 class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center z-50 p-4">
+	<div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-3xl overflow-hidden shadow-2xl">
+		<div class="p-5 border-b border-slate-800 flex justify-between items-center bg-slate-800/50">
+			<h3 class="text-lg font-bold flex items-center gap-2">
+				<i class="fa-solid fa-shield-halved text-indigo-400"></i> Verification & Gemini AI Underwriter
+			</h3>
+			<a id="downloadPdfBtn" href="#"
+			   class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold px-4 py-2 rounded-xl text-[12px] hidden">
+				<i class="fa-solid fa-download"></i>
+				Download PDF
+			</a>
+			<button onclick="closeModal()" class="text-slate-400 hover:text-white text-lg">&times;</button>
+		</div>
+
+		<div class="p-6 space-y-6 max-h-[80vh] overflow-y-auto">
+			<!-- Details Grid -->
+			<div class="grid grid-cols-2 gap-4 bg-slate-800/40 p-4 rounded-xl border border-slate-700/50 text-sm">
+				<div>
+					<span class="text-slate-400">Applicant:</span>
+					<strong id="modalApplicant" class="text-white">---</strong>
+				</div>
+				<div>
+					<span class="text-slate-400">Loan Category:</span>
+					<strong id="modalCategory" class="text-white">---</strong>
+				</div>
+				<div>
+					<span class="text-slate-400">Amount:</span>
+					<strong id="modalAmount" class="text-white">---</strong>
+				</div>
+				<div class="col-span-2">
+					<span class="text-slate-400">Collateral Details:</span>
+					<p id="modalCollateral" class="text-slate-300 font-medium mt-1">---</p>
+				</div>
+			</div>
+
+			<!-- AI Output Area -->
+			<div id="aiOutputContainer"
+				 class="hidden bg-slate-950 p-5 rounded-xl border border-indigo-500/30 text-sm space-y-3">
+				<h4 class="font-bold text-indigo-400 flex items-center gap-2">
+					<i class="fa-solid fa-brain"></i> Gemini 2.5 Flash Risk Prediction & Assessment
+				</h4>
+				<div id="aiOutputContent" class="text-slate-300 space-y-2"></div>
+			</div>
+			<!-- Action Bar -->
+			<div class="p-4 border-t border-slate-800 bg-slate-800/30 flex justify-between items-center">
+				<button onclick="runGeminiAiCompiler()" id="compileBtn"
+						class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-2 transition-all">
+					<i class="fa-solid fa-microchip"></i> Extract & Predict Risk with Gemini AI
+				</button>
+				<button onclick="closeModal()"
+						class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2 rounded-xl text-xs font-semibold">
+					Close
+				</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+	let currentLoanId = null;
+
+	async function openVerificationModal(loanId) {
+		currentLoanId = loanId;
+
+		const downloadBtn = document.getElementById('downloadPdfBtn');
+		console.log(downloadBtn)
+		const response = await fetch(`/LoanOfficer/GetLoanDetails/${loanId}`);
+		if (!response.ok) {
+			alert("Unable to load loan details.");
+			return;
+		}
+
+		const data = await response.json();
+		console.log(data)
+
+		if (data.isDoc && downloadBtn) {
+			downloadBtn.href =
+				`/LoanOfficer/DownloadPdf?id=${loanId}`;
+			downloadBtn.classList.remove("hidden");
+		}
+		document.getElementById('modalApplicant').innerText =
+			data.applicantName ?? 'N/A';
+
+		document.getElementById('modalCategory').innerText =
+			data.loanType ?? 'N/A';
+
+		document.getElementById('modalAmount').innerText =
+			'₹' + Number(data.principalAmount ?? 0).toLocaleString('en-IN');
+
+		document.getElementById('modalCollateral').innerText =
+			data.collateralDetails ?? 'No details available';
+
+		// Reset previous AI outputs when opening modal
+		document.getElementById('aiOutputContainer').classList.add('hidden');
+		document.getElementById('aiOutputContent').innerHTML = '';
+
+		document.getElementById('verifyModal').classList.remove('hidden');
+	}
+
+	function closeModal() {
+		document.getElementById('verifyModal').classList.add('hidden');
+		currentLoanId = null;
+	}
+
+	async function runGeminiAiCompiler() {
+		if (!currentLoanId) return;
+
+		const compileBtn = document.getElementById('compileBtn');
+		const aiOutputContainer = document.getElementById('aiOutputContainer');
+		const aiOutputContent = document.getElementById('aiOutputContent');
+
+		compileBtn.disabled = true;
+		compileBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Processing Gemini AI Analysis...`;
+
+		try {
+			const response = await fetch(`/LoanOfficer/AnalyzeLoan?id=${currentLoanId}`, {
+				method: 'POST'
+			});
+
+			if (response.ok) {
+				const htmlResult = await response.json();
+				console.log(htmlResult);
+				aiOutputContent.innerHTML = htmlResult;
+				aiOutputContainer.classList.remove('hidden');
+			} else {
+				aiOutputContent.innerHTML = '<span class="text-red-400">Failed to analyze risk score.</span>';
+				aiOutputContainer.classList.remove('hidden');
+			}
+		} catch (err) {
+			console.error(err);
+			aiOutputContent.innerHTML = '<span class="text-red-400">Error processing request. Check console details.</span>';
+			aiOutputContainer.classList.remove('hidden');
+		} finally {
+			compileBtn.disabled = false;
+			compileBtn.innerHTML = `<i class="fa-solid fa-microchip"></i> Extract & Predict Risk with Gemini AI`;
+		}
+	}
+</script>
