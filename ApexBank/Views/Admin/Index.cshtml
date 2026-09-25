@@ -1,0 +1,27 @@
+﻿<div class="flex justify-between mb-6">
+    <h1 class="text-3xl font-bold">Admin · Staff Management</h1>
+    <a href="/Admin/CreateStaff" class="bg-blue-600 px-4 py-2 rounded">Create Staff</a>
+</div>
+<div class="bg-slate-900 rounded-xl p-5">
+    <table class="w-full">
+        <tr class="text-slate-400 text-left">
+            <th>Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th></th>
+        </tr>@foreach(var u in Model){
+        <tr class="border-t border-slate-800">
+            <td class="py-3">@u.Name</td>
+            <td>@u.Email</td>
+            <td>@u.Role</td>
+            <td>@(u.IsActive ? "Active" : "Inactive")</td>
+            <td>
+                <form method="post" action="/Admin/Toggle">
+                    <button name="id" value="@u.Id" class="text-blue-400">Toggle</button>
+                </form>
+            </td>
+        </tr>
+    }
+</table>
+</div>
