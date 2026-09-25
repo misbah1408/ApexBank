@@ -1,0 +1,20 @@
+﻿@model ApexBank.ViewModels.RegisterVm;
+
+<div class="max-w-2xl mx-auto bg-slate-900 border border-slate-800 rounded-2xl p-8">
+    <h1 class="text-2xl font-bold mb-6">Customer Registration</h1>
+    <form method="post" class="grid md:grid-cols-2 gap-4">
+        <div asp-validation-summary="All" class="md:col-span-2 text-red-400"></div>
+        <input asp-for="Name" placeholder="Full Name" class="p-3 rounded bg-slate-800" />
+        <input asp-for="Email" placeholder="Email" class="p-3 rounded bg-slate-800" />
+        <input asp-for="Phone" placeholder="Phone" class="p-3 rounded bg-slate-800" />
+        <input asp-for="DateOfBirth" class="p-3 rounded bg-slate-800" />
+        <input asp-for="Address" placeholder="Address" class="p-3 rounded bg-slate-800 md:col-span-2" />
+        <input asp-for="City" placeholder="City" class="p-3 rounded bg-slate-800" />
+        <input asp-for="State" placeholder="State" class="p-3 rounded bg-slate-800" />
+        <input asp-for="Pincode" placeholder="Pincode" class="p-3 rounded bg-slate-800" />
+        <select asp-for="AccountType" class="p-3 rounded bg-slate-800">
+            <option>Savings</option>
+            <option>Current</option>
+        </select><button class="md:col-span-2 bg-blue-600 p-3 rounded">Submit Registration</button>
+    </form>
+</div>

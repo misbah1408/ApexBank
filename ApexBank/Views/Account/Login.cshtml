@@ -1,0 +1,24 @@
+﻿@model ApexBank.ViewModels.LoginVm;
+
+<div class="max-w-md mx-auto mt-16 bg-slate-900 border border-slate-800 rounded-2xl p-8">
+    <h1 class="text-2xl font-bold mb-2">Bank Login</h1>
+    <p class="text-slate-400 mb-6">Sign in to your banking dashboard</p>
+    <form method="post" class="space-y-4">
+        <div asp-validation-summary="All" class="text-red-400">
+        </div>
+        <input asp-for="Email" placeholder="Email"
+               class="w-full p-3 rounded bg-slate-800" />
+        <input asp-for="Password" type="password" placeholder="Password"
+               class="w-full p-3 rounded bg-slate-800" />
+        <button class="w-full bg-blue-600 p-3 rounded font-semibold">
+            Login
+        </button>
+    </form>
+    <p class="mt-5 text-sm text-slate-400">
+        New customer? <a class="text-blue-400" href="/Account/Register">Register</a>
+    </p>
+    <div class="mt-6 text-xs text-slate-500">
+        Demo: admin@bank.local / 1990 · teller@bank.local / 1992 ·
+        officer@bank.local / 1991 · auditor@bank.local / 1989
+    </div>
+</div>
