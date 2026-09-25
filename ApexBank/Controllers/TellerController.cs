@@ -6,6 +6,7 @@ using ApexBank.Enums;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ApexBank.ViewModels;
+namespace ApexBank.Controllers;
 
 [Authorize(Roles = "Teller")]
 public class TellerController(AppDbContext d, BankingService b, AuditService a) : Controller

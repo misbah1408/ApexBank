@@ -1,7 +1,7 @@
 using ApexBank.Data;
 using ApexBank.Models;
 using System.Security.Claims;
-namespace BankingLoanManagement.Services;
+namespace ApexBank.Services;
 
 public class AuditService(AppDbContext db)
 {

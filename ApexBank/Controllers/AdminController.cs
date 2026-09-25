@@ -5,7 +5,7 @@ using ApexBank.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-namespace BankingLoanManagement.Controllers
+namespace ApexBank.Controllers
 {
     [Authorize(Roles = "Admin")]
     public class AdminController(AppDbContext d) : Controller

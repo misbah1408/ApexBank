@@ -3,7 +3,7 @@ using ApexBank.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-namespace BankingLoanManagement.Controllers
+namespace ApexBank.Controllers
 {
     [Authorize(Roles = "Auditor")]
     public class AuditorController(AppDbContext d) : Controller
