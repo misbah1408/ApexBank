@@ -27,7 +27,4 @@ public class AuditLog
 
     [MaxLength(2000)]
     public string? Details { get; set; }
-
-    [MaxLength(45)]
-    public string? IpAddress { get; set; }
 }

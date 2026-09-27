@@ -1,4 +1,4 @@
 namespace ApexBank.Enums
 {
-    public enum LoanType { Home, Vehicle, Gold, Personal }
+    public enum LoanType { Vehicle, Gold, Personal }
 }
