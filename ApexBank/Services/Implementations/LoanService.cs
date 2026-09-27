@@ -1,11 +1,13 @@
 using ApexBank.Data;
 using ApexBank.Enums;
 using ApexBank.Models;
+using ApexBank.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
-namespace ApexBank.Services;
+namespace ApexBank.Services.Implementation;
 
-public class LoanService(AppDbContext db)
+public class LoanService(AppDbContext db) : ILoanService
 {
+    private readonly AppDbContext db = db;
     public static decimal CalculateEmi(decimal p, decimal annual, int months)
     {
         if (months <= 0) return 0;
@@ -16,7 +18,7 @@ public class LoanService(AppDbContext db)
     }
     public async Task ApproveAsync(int id, decimal rate)
     {
-        var loan = await db.Loans.Include(x=>x.CustomerProfile)
+        var loan = await db.Loans.Include(x => x.CustomerProfile)
                             .ThenInclude(x => x.Accounts)
                             .FirstAsync(x => x.Id == id);
         loan.Status = LoanStatus.Approved;

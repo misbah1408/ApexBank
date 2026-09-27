@@ -28,9 +28,6 @@ public class CustomerProfile
     [RegularExpression(@"^\d{6}$")]
     public string Pincode { get; set; } = string.Empty;
 
-    [Range(300, 900)]
-    public int? CreditScore { get; set; }
-
     [ForeignKey(nameof(UserId))]
     public User User { get; set; } = null!;
 

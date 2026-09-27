@@ -46,19 +46,11 @@ public class Loan
     [Required]
     public LoanStatus Status { get; set; } = LoanStatus.Applied;
 
-    [Required]
-    [Range(300, 900)]
-    public int CreditScore { get; set; }
-
-    [Required]
-    [MaxLength(20)]
-    public string RiskRating { get; set; } = "Medium";
-
     [MaxLength(1000)]
     public string? CollateralDetails { get; set; }
 
-    [MaxLength(500)]
-    public string? DocumentPath { get; set; }
+    // Maps to VARBINARY(MAX) in SQL Server
+    public byte[] FileData { get; set; } = [];
 
     [MaxLength(500)]
     public string? RejectionReason { get; set; }

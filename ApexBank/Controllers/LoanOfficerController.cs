@@ -1,17 +1,18 @@
 using ApexBank.Data;
 using ApexBank.Enums;
-using ApexBank.Services;
+using ApexBank.Services.Implementation;
+using ApexBank.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 namespace ApexBank.Controllers
 {
     [Authorize(Roles = "LoanOfficer")]
-    public class LoanOfficerController(AppDbContext d, LoanService s, AuditService a) : Controller
+    public class LoanOfficerController(AppDbContext d, ILoanService s, IAuditService a) : Controller
     {
         readonly AppDbContext db = d;
-        readonly LoanService service = s;
-        readonly AuditService audit = a;
+        readonly ILoanService service = s;
+        readonly IAuditService audit = a;
 
         public async Task<IActionResult> Index() => View(await db.Loans.Include(x => x.CustomerProfile).ThenInclude(x => x.User).Where(x => x.Status == LoanStatus.Applied).OrderBy(x => x.AppliedDate).ToListAsync());
         [HttpPost]
@@ -19,7 +20,7 @@ namespace ApexBank.Controllers
         {
             if (interestRate <= 0) interestRate = 10;
             await service.ApproveAsync(id, interestRate);
-            await audit.LogAsync(User, "LOAN", "APPROVE", $"Approved loan #{id} at {interestRate}%", HttpContext);
+            await audit.LogAsync(User, "LOAN", "APPROVE", $"Approved loan #{id} at {interestRate}%");
             TempData["Success"] = "Loan approved, disbursed and EMI schedule generated.";
             return RedirectToAction("Index");
         }
@@ -32,10 +33,25 @@ namespace ApexBank.Controllers
                 l.Status = LoanStatus.Rejected;
                 l.RejectionReason = reason;
                 await db.SaveChangesAsync();
-                await audit.LogAsync(User, "LOAN", "REJECT", $"Rejected loan #{id}", HttpContext);
+                await audit.LogAsync(User, "LOAN", "REJECT", $"Rejected loan #{id}");
             }
             return RedirectToAction("Index");
         }
-    }
 
+        public async Task<IActionResult> DownloadPdf(int id)
+        {
+            var loan = await db.Loans.FindAsync(id);
+
+            if (loan == null || loan.FileData == null || loan.FileData.Length == 0)
+            {
+                return NotFound("PDF not found.");
+            }
+
+            return File(
+                loan.FileData,
+                "application/pdf",
+                $"LoanDocument_{loan.Id}.pdf"
+            );
+        }
+    }
 }
