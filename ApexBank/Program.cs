@@ -20,6 +20,13 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.LoginPath = "/Account/Login";
         options.AccessDeniedPath = "/Account/AccessDenied";
     });
+
+//2. Inject HttpClient
+builder.Services.AddHttpClient("BankApi", client =>
+{
+    client.BaseAddress = new Uri("https://localhost:7173/");
+});
+
 builder.Services.AddScoped<IAuditService, AuditService>();
 builder.Services.AddScoped<IBankingService, BankingService>();
 builder.Services.AddScoped<ILoanService, LoanService>();

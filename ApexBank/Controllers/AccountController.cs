@@ -10,32 +10,52 @@ using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 namespace ApexBank.Controllers;
 
-public class AccountController(AppDbContext db) : Controller
+public class AccountController(AppDbContext db, IHttpClientFactory factory) : Controller
 {
     readonly AppDbContext db = db;
-
+    private readonly HttpClient _httpClient = factory.CreateClient("BankApi");
 
     [AllowAnonymous]
     public IActionResult Login() => View();
 
-    [HttpPost, AllowAnonymous]
+    [HttpPost]
+    [AllowAnonymous]
     public async Task<IActionResult> Login(LoginVm m)
     {
-        if (!ModelState.IsValid) return View(m);
-        var u = await db.Users.FirstOrDefaultAsync(x => x.Email == m.Email && x.Password == m.Password && x.IsActive && x.IsApproved);
-        if (u == null)
+        if (!ModelState.IsValid)
+            return View(m);
+
+        var response = await _httpClient.PostAsJsonAsync("api/auth/getuser", m);
+
+        if (!response.IsSuccessStatusCode)
         {
-            ModelState.AddModelError("", "Invalid credentials or account is not approved.");
+            ModelState.AddModelError("", "Invalid credentials.");
             return View(m);
         }
+
+        var u = await response.Content.ReadFromJsonAsync<User>();
+
+        if (u == null)
+        {
+            ModelState.AddModelError("", "Invalid credentials.");
+            return View(m);
+        }
+
         var claims = new[]
-            {
-                new Claim(ClaimTypes.NameIdentifier, u.Id.ToString()),
-                new Claim(ClaimTypes.Name, u.Name),
-                new Claim(ClaimTypes.Email, u.Email),
-                new Claim(ClaimTypes.Role, u.Role.ToString())
-            };
-        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme)));
+        {
+        new Claim(ClaimTypes.NameIdentifier, u.Id.ToString()),
+        new Claim(ClaimTypes.Name, u.Name),
+        new Claim(ClaimTypes.Email, u.Email),
+        new Claim(ClaimTypes.Role, u.Role.ToString())
+    };
+
+        await HttpContext.SignInAsync(
+            CookieAuthenticationDefaults.AuthenticationScheme,
+            new ClaimsPrincipal(
+                new ClaimsIdentity(
+                    claims,
+                    CookieAuthenticationDefaults.AuthenticationScheme)));
+
         return u.Role switch
         {
             Role.Customer => RedirectToAction("Dashboard", "Customer"),
@@ -46,6 +66,7 @@ public class AccountController(AppDbContext db) : Controller
             _ => RedirectToAction("Login")
         };
     }
+
     [AllowAnonymous]
     public IActionResult Register() => View(new RegisterVm());
 
