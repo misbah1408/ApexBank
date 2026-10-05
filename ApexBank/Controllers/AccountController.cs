@@ -26,13 +26,13 @@ public class AccountController(AppDbContext db, IHttpClientFactory factory) : Co
             return View(m);
 
         var response = await _httpClient.PostAsJsonAsync("api/auth/getuser", m);
-
+        // 1. Check if the API rejected the login
         if (!response.IsSuccessStatusCode)
         {
             ModelState.AddModelError("", "Invalid credentials.");
             return View(m);
         }
-
+        // 2. Read the returned user data
         var u = await response.Content.ReadFromJsonAsync<User>();
 
         if (u == null)
@@ -40,7 +40,7 @@ public class AccountController(AppDbContext db, IHttpClientFactory factory) : Co
             ModelState.AddModelError("", "Invalid credentials.");
             return View(m);
         }
-
+        // 3. Create security claims (the user's identity card)
         var claims = new[]
         {
         new Claim(ClaimTypes.NameIdentifier, u.Id.ToString()),
@@ -48,7 +48,7 @@ public class AccountController(AppDbContext db, IHttpClientFactory factory) : Co
         new Claim(ClaimTypes.Email, u.Email),
         new Claim(ClaimTypes.Role, u.Role.ToString())
     };
-
+        // 4. Issue the local authentication cookie
         await HttpContext.SignInAsync(
             CookieAuthenticationDefaults.AuthenticationScheme,
             new ClaimsPrincipal(

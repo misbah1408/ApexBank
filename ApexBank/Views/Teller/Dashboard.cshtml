@@ -1,4 +1,4 @@
-<h1 class="text-3xl font-bold mb-6">Teller Dashboard</h1>
+@* <h1 class="text-3xl font-bold mb-6">Teller Dashboard</h1>
 <div class="grid lg:grid-cols-2 gap-6">
 	<section class="bg-slate-900 p-5 rounded-xl">
 		<h2 class="font-bold mb-4">Pending Customer Registrations</h2>@foreach(var u in
@@ -53,4 +53,152 @@
 		<input name="Amount" type="number" step="0.01" placeholder="Amount" class="p-2 bg-slate-800 rounded" />
 		<button class="bg-blue-600 rounded">Execute</button>
 	</form>
+</section> *@
+<h1 class="text-3xl font-bold mb-6">Teller Dashboard</h1>
+
+<div class="grid lg:grid-cols-2 gap-6">
+    <!-- Pending Customer Registrations Section -->
+    <section class="bg-slate-900 p-5 rounded-xl">
+        <h2 class="font-bold mb-4">Pending Customer Registrations</h2>
+        
+        @foreach (var u in (IEnumerable<User>)ViewBag.Registrations)
+        {
+            <div class="border-b border-slate-800 py-3">
+                <b>@u.Name</b>
+                <p class="text-sm text-slate-900">@u.Email · DOB @u.DateOfBirth.ToShortDateString()</p>
+                
+                <form method="post" action="/Teller/CustomerDecision" class="inline mt-2">
+                    <input type="hidden" name="id" value="@u.Id" />
+                    <input type="hidden" name="approve" value="true" />
+                    <button class="bg-emerald-600 px-3 py-1 rounded mr-2">Approve</button>
+                </form>
+                
+                <form method="post" action="/Teller/CustomerDecision" class="inline mt-2">
+                    <input type="hidden" name="id" value="@u.Id" />
+                    <input type="hidden" name="approve" value="false" />
+                    <button class="bg-red-600 px-3 py-1 rounded">Reject</button>
+                </form>
+            </div>
+        }
+        
+        @if (!((IEnumerable<User>)ViewBag.Registrations).Any())
+        {
+            <p class="text-slate-500">No pending registrations.</p>
+        }
+    </section>
+
+    <!-- Deposit / Withdrawal Requests Section -->
+    <section class="bg-slate-900 p-5 rounded-xl">
+        <h2 class="font-bold mb-4">Deposit / Withdrawal Requests</h2>
+        
+        @foreach (var t in (IEnumerable<Transaction>)ViewBag.Requests)
+        {
+            <div class="border-b border-slate-800 py-3">
+                <b>@t.Type · @t.Account.AccountNumber</b>
+                <p>₹@t.Amount.ToString("N2")</p>
+                
+                <form method="post" action="/Teller/RequestDecision" class="inline">
+                    <input type="hidden" name="id" value="@t.Id" />
+                    <input type="hidden" name="approve" value="true" />
+                    <button class="bg-emerald-600 px-3 py-1 rounded mr-2">Approve</button>
+                </form>
+                
+                <form method="post" action="/Teller/RequestDecision" class="inline">
+                    <input type="hidden" name="id" value="@t.Id" />
+                    <input type="hidden" name="approve" value="false" />
+                    <button class="bg-red-600 px-3 py-1 rounded">Reject</button>
+                </form>
+            </div>
+        }
+    </section>
+</div>
+
+<!-- Counter Transaction Section -->
+<section class="bg-slate-900 p-5 rounded-xl mt-6">
+    <h2 class="font-bold mb-4">Counter Transaction</h2>
+    
+    <form method="post" action="/Teller/Counter" class="grid md:grid-cols-4 gap-3 overflow-visible">
+        
+        <!-- Custom Searchable Select Dropdown -->
+        <div class="relative" id="searchableSelectWrapper">
+            <!-- Hidden input stores the actual AccountNumber submitted to the controller -->
+            <input type="hidden" name="AccountNumber" id="accountNumberHidden" required />
+            
+            <!-- Visible input for searching -->
+            <input type="text" id="accountSearchInput" placeholder="Name, Account, or ID" class="p-2 bg-slate-800 rounded text-slate-200 w-full outline-none focus:ring-2 focus:ring-blue-600" autocomplete="off" />
+            
+            <!-- Custom Dropdown Menu -->
+            <ul id="accountDropdown" class="absolute z-10 w-full bg-slate-800 mt-1 rounded shadow-lg max-h-60 overflow-y-auto hidden border border-slate-700">
+                @if (ViewBag.AccountDetails != null)
+                {
+                    foreach (var acc in (IEnumerable<Tuple<string, string>>)ViewBag.AccountDetails)
+                    {
+                        <li class="p-2 hover:bg-blue-600 cursor-pointer border-b border-slate-700 last:border-0 transition-colors" data-value="@acc.Item1">
+                            <div class="font-bold text-slate-200 option-acc">@acc.Item1</div>
+                            <div class="text-sm text-slate-400 option-name">@acc.Item2</div>
+                        </li>
+                    }
+                }
+            </ul>
+        </div>
+        
+        <select name="Type" class="p-2 bg-slate-800 rounded text-slate-200">
+            <option>Deposit</option>
+            <option>Withdrawal</option>
+        </select>
+        
+        <input name="Amount" type="number" step="0.01" placeholder="Amount" class="p-2 bg-slate-800 rounded text-slate-200" required />
+        
+        <button class="bg-blue-600 rounded font-semibold py-2 hover:bg-blue-500 transition">Execute</button>
+    </form>
 </section>
+
+<!-- Searchable Select Script -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const wrapper = document.getElementById('searchableSelectWrapper');
+        const searchInput = document.getElementById('accountSearchInput');
+        const hiddenInput = document.getElementById('accountNumberHidden');
+        const dropdown = document.getElementById('accountDropdown');
+        const options = dropdown.querySelectorAll('li');
+
+        // Open dropdown on focus or click
+        searchInput.addEventListener('focus', () => dropdown.classList.remove('hidden'));
+        searchInput.addEventListener('click', () => dropdown.classList.remove('hidden'));
+
+        // Filter items dynamically as the user types
+        searchInput.addEventListener('input', function () {
+            const filterText = this.value.toLowerCase();
+            dropdown.classList.remove('hidden');
+            
+            options.forEach(option => {
+                const textContent = option.textContent.toLowerCase();
+                if (textContent.includes(filterText)) {
+                    option.style.display = 'block';
+                } else {
+                    option.style.display = 'none';
+                }
+            });
+        });
+
+        // Set the hidden value and close dropdown when an option is clicked
+        options.forEach(option => {
+            option.addEventListener('click', function () {
+                const accountVal = this.getAttribute('data-value');
+                const nameVal = this.querySelector('.option-name').textContent.split(' (ID:')[0];
+                
+                hiddenInput.value = accountVal;
+                // Update the visual input to show what was selected
+                searchInput.value = `${accountVal} - ${nameVal}`;
+                dropdown.classList.add('hidden');
+            });
+        });
+
+        // Hide dropdown if the user clicks anywhere outside of the component
+        document.addEventListener('click', function (e) {
+            if (!wrapper.contains(e.target)) {
+                dropdown.classList.add('hidden');
+            }
+        });
+    });
+</script>

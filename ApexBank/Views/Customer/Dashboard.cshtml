@@ -2,251 +2,337 @@
 @model CustomerProfile
 
 @{
-    ViewData["Title"] = "Customer Dashboard";
-    var transactions = (IEnumerable<Transaction>?)ViewBag.Transactions ?? Enumerable.Empty<Transaction>();
-    var activeLoans = Model.Loans?.Where(x => x.Status == LoanStatus.Approved).ToList() ?? new List<Loan>();
+	ViewData["Title"] = "Customer Dashboard";
+	var transactions = (IEnumerable<Transaction>?)ViewBag.Transactions ?? Enumerable.Empty<Transaction>();
+	var activeLoans = Model.Loans?.Where(x => x.Status == LoanStatus.Approved).ToList() ?? new List<Loan>();
 }
 
 <!-- Top Header Section -->
 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-    <div>
-        <h1 class="text-3xl font-bold tracking-tight">Customer Dashboard</h1>
-        <p class="text-slate-400">Welcome back, <span class="text-slate-200 font-semibold">@Model.User.Name</span></p>
-    </div>
-    <a href="/Customer/ApplyLoan" class="bg-blue-600 hover:bg-blue-500 text-white font-medium px-4 py-2 rounded-lg transition-colors flex items-center gap-2">
-        <i class="fa-solid fa-plus text-xs"></i> Apply For Loan
-    </a>
+	<div>
+		<h1 class="text-3xl font-bold tracking-tight">Customer Dashboard</h1>
+		<p class="text-slate-400">Welcome back, <span class="text-slate-200 font-semibold">@Model.User.Name</span></p>
+	</div>
+	<a href="/Customer/ApplyLoan" class="bg-blue-600 hover:bg-blue-500 text-white font-medium px-4 py-2 rounded-lg transition-colors flex items-center gap-2">
+		<i class="fa-solid fa-plus text-xs"></i> Apply For Loan
+	</a>
 </div>
 
 <!-- Account Summary Cards -->
 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-    @foreach (var a in Model.Accounts)
-    {
-        <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 relative overflow-hidden shadow-lg">
-            <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">@a.AccountType Account</div>
-            <div class="text-3xl font-extrabold text-emerald-400">₹@a.Balance.ToString("N2")</div>
-            <div class="text-xs text-slate-400 mt-2 font-mono">Acc No: @a.AccountNumber</div>
-            <div class="absolute right-4 bottom-4 opacity-10 text-emerald-400 text-6xl pointer-events-none">
-                <i class="fa-solid fa-wallet"></i>
-            </div>
-        </div>
-    }
+	@foreach (var a in Model.Accounts)
+	{
+		<div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 relative overflow-hidden shadow-lg">
+			<div class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">@a.AccountType Account</div>
+			<div class="text-3xl font-extrabold text-emerald-400">₹@a.Balance.ToString("N2")</div>
+			<div class="text-xs text-slate-400 mt-2 font-mono">Acc No: @a.AccountNumber</div>
+			<div class="absolute right-4 bottom-4 opacity-10 text-emerald-400 text-6xl pointer-events-none">
+				<i class="fa-solid fa-wallet"></i>
+			</div>
+		</div>
+	}
 
-    <!-- Active Loan Summary Card -->
-    <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 relative overflow-hidden shadow-lg">
-        <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Active Loan Balance</div>
-        <div class="text-3xl font-extrabold text-amber-400">
-            ₹@activeLoans.Sum(x => x.BalanceRemaining).ToString("N2")
-        </div>
-        <div class="text-xs text-slate-400 mt-2 font-mono">Total Active Loans: @activeLoans.Count</div>
-        <div class="absolute right-4 bottom-4 opacity-10 text-amber-400 text-6xl pointer-events-none">
-            <i class="fa-solid fa-hand-holding-dollar"></i>
-        </div>
-    </div>
+	<!-- Active Loan Summary Card -->
+	<div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 relative overflow-hidden shadow-lg">
+		<div class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Active Loan Balance</div>
+		<div class="text-3xl font-extrabold text-amber-400">
+			₹@activeLoans.Sum(x => x.BalanceRemaining).ToString("N2")
+		</div>
+		<div class="text-xs text-slate-400 mt-2 font-mono">Total Active Loans: @activeLoans.Count</div>
+		<div class="absolute right-4 bottom-4 opacity-10 text-amber-400 text-6xl pointer-events-none">
+			<i class="fa-solid fa-hand-holding-dollar"></i>
+		</div>
+	</div>
 </div>
 
 <!-- Main Content Grid -->
 <div class="grid lg:grid-cols-3 gap-6">
-    
-    <!-- Quick Transaction Sidebar -->
-    <section class="bg-slate-800/90 p-5 rounded-2xl border border-slate-700 lg:col-span-1 max-h-fit shadow-md">
-        <h2 class="font-bold text-lg mb-4 flex items-center gap-2">
-            <i class="fa-solid fa-paper-plane text-blue-500"></i> Quick Action
-        </h2>
-        
-        <form method="post" action="/Customer/Transaction" class="space-y-4">
-            @Html.AntiForgeryToken()
-            
-            <div>
-                <label class="block text-xs font-semibold text-slate-400 mb-1">From Account</label>
-                <select name="AccountNumber" class="w-full p-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-slate-200 focus:ring-2 focus:ring-blue-500 outline-none">
-                    @foreach (var a in Model.Accounts)
-                    {
-                        <option value="@a.AccountNumber">@a.AccountType (@a.AccountNumber)</option>
-                    }
-                </select>
-            </div>
 
-            <div>
-                <label class="block text-xs font-semibold text-slate-400 mb-1">Transaction Type</label>
-                <select id="transactionType" name="Type" class="w-full p-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-slate-200 focus:ring-2 focus:ring-blue-500 outline-none" onchange="toggleTransferInput()">
-                    <option value="Deposit">Deposit</option>
-                    <option value="Withdrawal">Withdrawal</option>
-                    <option value="Transfer">Transfer</option>
-                </select>
-            </div>
+	<div class="bg-slate-900 p-5 rounded-xl h-fit">
+		<h2 class="font-bold mb-4 text-slate-100 flex items-center gap-2">
+			<i class="fa-solid fa-paper-plane text-blue-500"></i> Quick Action
+		</h2>
 
-            <div id="transferAccountGroup" class="hidden">
-                <label class="block text-xs font-semibold text-slate-400 mb-1">Target Account Number</label>
-                <input name="ToAccountNumber" placeholder="Enter recipient account number"
-                       class="w-full p-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-slate-200 focus:ring-2 focus:ring-blue-500 outline-none placeholder:text-slate-600" />
-            </div>
+		<form method="post" action="/Customer/Transaction">
+			<!-- From Account -->
+			<div class="mb-4">
+				<label class="block text-sm text-slate-400 mb-1">From Account</label>
+				<select name="AccountNumber" class="w-full p-2 bg-slate-800 rounded text-slate-200 border border-slate-700 outline-none focus:ring-2 focus:ring-blue-500">
+					@if (Model.Accounts != null)
+					{
+						foreach (var account in Model.Accounts)
+						{
+							<option value="@account.AccountNumber">
+								@account.AccountType (@account.AccountNumber)
+							</option>
+						}
+					}
+				</select>
+			</div>
 
-            <div>
-                <label class="block text-xs font-semibold text-slate-400 mb-1">Amount (₹)</label>
-                <input name="Amount" type="number" step="0.01" min="1" placeholder="0.00" required
-                       class="w-full p-2.5 rounded-lg bg-slate-900 border border-slate-700 text-sm text-slate-200 focus:ring-2 focus:ring-blue-500 outline-none placeholder:text-slate-600" />
-            </div>
+			<!-- Transaction Type -->
+			<div class="mb-4">
+				<label class="block text-sm text-slate-400 mb-1">Transaction Type</label>
+				<select id="transactionType" name="Type" class="w-full p-2 bg-slate-800 rounded text-slate-200 border border-slate-700 outline-none focus:ring-2 focus:ring-blue-500">
+					<option value="Deposit" selected>Deposit</option>
+					<option value="Withdrawal">Withdrawal</option>
+					<option value="Transfer">Transfer</option>
+				</select>
+			</div>
 
-            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 font-medium p-2.5 rounded-lg transition-colors shadow">
-                Execute Transaction
-            </button>
-        </form>
-    </section>
+			<!-- Target Account Number (Custom Searchable Select) -->
+			<div class="mb-4" id="targetAccountGroup">
+				<label class="block text-sm text-slate-400 mb-1">Target Account Number</label>
 
-    <!-- Right Side: Transactions & Schedules -->
-    <section class="bg-slate-800 p-6 rounded-2xl border border-slate-700 lg:col-span-2 space-y-8 shadow-md">
-        
-        <!-- Recent Transactions -->
-        <div>
-            <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
-                <i class="fa-solid fa-clock-rotate-left text-emerald-500"></i> Recent Account Activity
-            </h2>
-            <div class="overflow-x-auto rounded-lg border border-slate-700/60">
-                <table class="w-full text-left text-xs">
-                    <thead class="bg-slate-900 text-slate-400 uppercase tracking-wider font-semibold">
-                        <tr>
-                            <th class="p-3">Ref ID</th>
-                            <th class="p-3">Type</th>
-                            <th class="p-3">Account</th>
-                            <th class="p-3">Amount</th>
-                            <th class="p-3">Date</th>
-                            <th class="p-3">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-700/50 bg-slate-800/50">
-                        @if (!transactions.Any())
-                        {
-                            <tr>
-                                <td colspan="6" class="p-4 text-center text-slate-500">No recent transactions found.</td>
-                            </tr>
-                        }
-                        else
-                        {
-                            @foreach (var t in transactions)
-                            {
-                                var isCredit = t.Type == TransactionType.Deposit || (t.Amount > 0 && t.Type == TransactionType.Transfer);
-                                var badgeClass = t.Type switch {
-                                    TransactionType.Deposit => "bg-emerald-500/20 text-emerald-400",
-                                    TransactionType.Transfer => "bg-blue-500/20 text-blue-400",
-                                    TransactionType.Withdrawal => "bg-red-500/20 text-red-400",
-                                    _ => "bg-slate-500/20 text-slate-400"
-                                };
+				<div class="relative" id="searchableSelectWrapper">
+					<!-- Hidden input stores the actual AccountNumber submitted to the controller -->
+					<input type="hidden" name="ToAccountNumber" id="targetAccountNumberHidden" required />
 
-                                <tr class="hover:bg-slate-700/30 transition-colors">
-                                    <td class="p-3 font-mono font-medium text-slate-300">@t.ReferenceNumber</td>
-                                    <td class="p-3">
-                                        <span class="px-2 py-1 rounded-md text-[10px] font-bold tracking-wider @badgeClass">
-                                            @t.Type.ToString().ToUpper()
-                                        </span>
-                                    </td>
-                                    <td class="p-3 font-mono text-slate-400">@t.Account?.AccountNumber</td>
-                                    <td class="p-3 font-bold @(isCredit ? "text-emerald-400" : "text-red-400")">
-                                        @(isCredit ? "+" : "-")₹@Math.Abs(t.Amount).ToString("N2")
-                                    </td>
-                                    <td class="p-3 text-slate-400">@t.TransactionDate.ToString("dd MMM yyyy")</td>
-                                    <td class="p-3 font-semibold @(t.Status == RequestStatus.Pending ? "text-amber-400" : t.Status == RequestStatus.Approved ? "text-emerald-400" : "text-red-400")">
-                                        @t.Status.ToString().ToUpper()
-                                    </td>
-                                </tr>
-                            }
-                        }
-                    </tbody>
-                </table>
-            </div>
-        </div>
+					<!-- Visible input for searching -->
+					<div class="relative">
+						<input type="text" id="targetAccountSearchInput" placeholder="Type name or account number..." class="w-full p-2 bg-slate-800 rounded text-slate-200 border border-slate-700 outline-none focus:ring-2 focus:ring-blue-500 pr-8" autocomplete="off" />
+						<div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+							<i class="fa-solid fa-caret-down text-slate-400"></i>
+						</div>
+					</div>
 
-        <!-- Active EMI Repayment Schedules -->
-        <div>
-            @if (!activeLoans.Any())
-            {
-                <div class="p-4 rounded-xl border border-slate-700 bg-slate-900/30 text-slate-500 text-xs text-center">
-                    No active loan schedules found.
-                </div>
-            }
-            else
-            {
-                @foreach (var l in activeLoans)
-                {
-                    <div class="mb-6 last:mb-0">
-                        <h3 class="text-sm font-bold mb-3 flex items-center gap-2 text-slate-200">
-                            <i class="fa-solid fa-calendar-check text-amber-500"></i> Active EMI Schedule (@l.LoanType Loan - Ref #@l.Id)
-                        </h3>
-                        <div class="overflow-x-auto rounded-lg border border-slate-700/60">
-                            <table class="w-full text-left text-xs">
-                                <thead class="bg-slate-900 text-slate-400 uppercase tracking-wider font-semibold">
-                                    <tr>
-                                        <th class="p-3">Due Date</th>
-                                        <th class="p-3">EMI Amount</th>
-                                        <th class="p-3">Principal</th>
-                                        <th class="p-3">Interest</th>
-                                        <th class="p-3">Status</th>
-                                        <th class="p-3 text-right">Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-slate-700/50 bg-slate-800/50">
-                                    @foreach (var s in l.RepaymentSchedules.OrderBy(x => x.InstallmentNumber).Take(2))
-                                    {
-                                        var isPending = s.Status == EmiStatus.Pending;
+					<!-- Custom Dropdown Menu -->
+					<ul id="targetAccountDropdown" class="absolute z-50 w-full bg-slate-800 mt-1 rounded shadow-lg max-h-60 overflow-y-auto hidden border border-slate-700">
+						@if (ViewBag.TargetAccounts != null)
+						{
+							foreach (var acc in (IEnumerable<Tuple<string, string>>)ViewBag.TargetAccounts)
+							{
+								<li class="p-2 hover:bg-blue-600 cursor-pointer border-b border-slate-700 last:border-0 transition-colors" data-value="@acc.Item1">
+									<div class="font-bold text-slate-200 option-acc">@acc.Item1</div>
+									<div class="text-sm text-slate-400 option-name">@acc.Item2</div>
+								</li>
+							}
+						}
+					</ul>
+				</div>
+			</div>
 
-                                        <tr class="@(isPending ? "bg-amber-500/5" : "") hover:bg-slate-700/30 transition-colors">
-                                            <td class="p-3 @(isPending ? "font-semibold text-amber-400" : "text-slate-400")">
-                                                @s.DueDate.ToString("yyyy-MM-dd")
-                                            </td>
-                                            <td class="p-3 font-semibold text-slate-200">₹@s.EmiAmount.ToString("N2")</td>
-                                            <td class="p-3 text-slate-400">₹@s.PrincipalComponent.ToString("N2")</td>
-                                            <td class="p-3 text-slate-400">₹@s.InterestComponent.ToString("N2")</td>
-                                            <td class="p-3">
-                                                @if (s.Status == EmiStatus.Paid)
-                                                {
-                                                    <span class="px-2 py-0.5 rounded text-[10px] bg-emerald-500/20 text-emerald-400 font-semibold">PAID</span>
-                                                }
-                                                else if (s.Status == EmiStatus.Pending)
-                                                {
-                                                    <span class="px-2 py-0.5 rounded text-[10px] bg-amber-500/20 text-amber-400 font-semibold">PENDING</span>
-                                                }
-                                                else
-                                                {
-                                                    <span class="px-2 py-0.5 rounded text-[10px] bg-slate-500/20 text-slate-400 font-semibold">@s.Status</span>
-                                                }
-                                            </td>
-                                            <td class="p-3 text-right">
-                                                @if (s.Status == EmiStatus.Paid)
-                                                {
-                                                    <span class="text-slate-500 text-[11px]">Settled</span>
-                                                }
-                                                else if (s.Status == EmiStatus.Pending)
-                                                {
-                                                    <form method="post" action="/Customer/PayEmi" class="inline">
-                                                        @Html.AntiForgeryToken()
-                                                        <input type="hidden" name="id" value="@s.Id" />
-                                                        <button type="submit" class="bg-emerald-600 hover:bg-emerald-500 text-white font-medium px-2.5 py-1 rounded text-xs transition-colors shadow">
-                                                            Pay Now
-                                                        </button>
-                                                    </form>
-                                                }
-                                            </td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                }
-            }
-        </div>
-    </section>
+			<!-- Amount -->
+			<div class="mb-6">
+				<label class="block text-sm text-slate-400 mb-1">Amount (₹)</label>
+				<input name="Amount" type="number" step="0.01" min="1" placeholder="0.00" class="w-full p-2 bg-slate-800 rounded text-slate-200 border border-slate-700 outline-none focus:ring-2 focus:ring-blue-500" required />
+			</div>
+
+			<button class="w-full bg-blue-600 hover:bg-blue-500 rounded font-semibold py-2 text-white transition-colors shadow">
+				Execute Transaction
+			</button>
+		</form>
+	</div>
+
+	<!-- Script for Custom Dropdown and Transfer Toggle -->
+	<script>
+			document.addEventListener("DOMContentLoaded", function() {
+				const typeSelect = document.getElementById('transactionType');
+				const targetGroup = document.getElementById('targetAccountGroup');
+				const hiddenInput = document.getElementById('targetAccountNumberHidden');
+
+				const wrapper = document.getElementById('searchableSelectWrapper');
+				const searchInput = document.getElementById('targetAccountSearchInput');
+				const dropdown = document.getElementById('targetAccountDropdown');
+				const options = dropdown.querySelectorAll('li');
+
+				// Toggle Transfer Input visibility
+				function toggleTargetAccount() {
+					if (typeSelect.value === 'Transfer') {
+						targetGroup.style.display = 'block';
+						hiddenInput.setAttribute('required', 'required');
+					} else {
+						targetGroup.style.display = 'none';
+						hiddenInput.removeAttribute('required');
+						hiddenInput.value = ""; // Clear selection if changed to Deposit/Withdrawal
+						searchInput.value = "";
+					}
+				}
+
+				toggleTargetAccount();
+				typeSelect.addEventListener('change', toggleTargetAccount);
+
+				// Searchable Select Logic
+				searchInput.addEventListener('focus', () => dropdown.classList.remove('hidden'));
+				searchInput.addEventListener('click', () => dropdown.classList.remove('hidden'));
+
+				// Filter items dynamically as the user types
+				searchInput.addEventListener('input', function () {
+					const filterText = this.value.toLowerCase();
+					dropdown.classList.remove('hidden');
+
+					options.forEach(option => {
+						const textContent = option.textContent.toLowerCase();
+						if (textContent.includes(filterText)) {
+							option.style.display = 'block';
+						} else {
+							option.style.display = 'none';
+						}
+					});
+				});
+
+				// Set the hidden value and close dropdown when an option is clicked
+				options.forEach(option => {
+					option.addEventListener('click', function () {
+						const accountVal = this.getAttribute('data-value');
+						const nameVal = this.querySelector('.option-name').textContent;
+
+						hiddenInput.value = accountVal;
+						searchInput.value = `${nameVal} - ${accountVal}`;
+						dropdown.classList.add('hidden');
+					});
+				});
+
+				// Hide dropdown if the user clicks anywhere outside of the component
+				document.addEventListener('click', function (e) {
+					if (!wrapper.contains(e.target)) {
+						dropdown.classList.add('hidden');
+					}
+				});
+			});
+	</script>
+
+	<!-- Right Side: Transactions & Schedules -->
+	<section class="bg-slate-800 p-6 rounded-2xl border border-slate-700 lg:col-span-2 space-y-8 shadow-md">
+
+		<!-- Recent Transactions -->
+		<div>
+			<h2 class="text-lg font-bold mb-4 flex items-center gap-2">
+				<i class="fa-solid fa-clock-rotate-left text-emerald-500"></i> Recent Account Activity
+			</h2>
+			<div class="overflow-x-auto rounded-lg border border-slate-700/60">
+				<table class="w-full text-left text-xs">
+					<thead class="bg-slate-900 text-slate-400 uppercase tracking-wider font-semibold">
+						<tr>
+							<th class="p-3">Ref ID</th>
+							<th class="p-3">Type</th>
+							<th class="p-3">Account</th>
+							<th class="p-3">Amount</th>
+							<th class="p-3">Date</th>
+							<th class="p-3">Status</th>
+						</tr>
+					</thead>
+					<tbody class="divide-y divide-slate-700/50 bg-slate-800/50">
+						@if (!transactions.Any())
+						{
+							<tr>
+								<td colspan="6" class="p-4 text-center text-slate-500">No recent transactions found.</td>
+							</tr>
+						}
+						else
+						{
+							@foreach (var t in transactions)
+							{
+								var isCredit = t.Type == TransactionType.Deposit || (t.Amount > 0 && t.Type == TransactionType.Transfer);
+								var badgeClass = t.Type switch
+								{
+									TransactionType.Deposit => "bg-emerald-500/20 text-emerald-400",
+									TransactionType.Transfer => "bg-blue-500/20 text-blue-400",
+									TransactionType.Withdrawal => "bg-red-500/20 text-red-400",
+									_ => "bg-slate-500/20 text-slate-400"
+								};
+
+								<tr class="hover:bg-slate-700/30 transition-colors">
+									<td class="p-3 font-mono font-medium text-slate-300">@t.ReferenceNumber</td>
+									<td class="p-3">
+										<span class="px-2 py-1 rounded-md text-[10px] font-bold tracking-wider @badgeClass">
+											@t.Type.ToString().ToUpper()
+										</span>
+									</td>
+									<td class="p-3 font-mono text-slate-400">@t.Account?.AccountNumber</td>
+									<td class="p-3 font-bold @(isCredit ? "text-emerald-400" : "text-red-400")">
+										@(isCredit ? "+" : "-")₹@Math.Abs(t.Amount).ToString("N2")
+									</td>
+									<td class="p-3 text-slate-400">@t.TransactionDate.ToString("dd MMM yyyy")</td>
+									<td class="p-3 font-semibold @(t.Status == RequestStatus.Pending ? "text-amber-400" : t.Status == RequestStatus.Approved ? "text-emerald-400" : "text-red-400")">
+										@t.Status.ToString().ToUpper()
+									</td>
+								</tr>
+							}
+						}
+					</tbody>
+				</table>
+			</div>
+		</div>
+
+		<!-- Active EMI Repayment Schedules -->
+		<div>
+			@if (!activeLoans.Any())
+			{
+				<div class="p-4 rounded-xl border border-slate-700 bg-slate-900/30 text-slate-500 text-xs text-center">
+					No active loan schedules found.
+				</div>
+			}
+			else
+			{
+				@foreach (var l in activeLoans)
+				{
+					<div class="mb-6 last:mb-0">
+						<h3 class="text-sm font-bold mb-3 flex items-center gap-2 text-slate-200">
+							<i class="fa-solid fa-calendar-check text-amber-500"></i> Active EMI Schedule (@l.LoanType Loan - Ref #@l.Id)
+						</h3>
+						<div class="overflow-x-auto rounded-lg border border-slate-700/60">
+							<table class="w-full text-left text-xs">
+								<thead class="bg-slate-900 text-slate-400 uppercase tracking-wider font-semibold">
+									<tr>
+										<th class="p-3">Due Date</th>
+										<th class="p-3">EMI Amount</th>
+										<th class="p-3">Principal</th>
+										<th class="p-3">Interest</th>
+										<th class="p-3">Status</th>
+										<th class="p-3 text-right">Action</th>
+									</tr>
+								</thead>
+								<tbody class="divide-y divide-slate-700/50 bg-slate-800/50">
+									@foreach (var s in l.RepaymentSchedules.OrderBy(x => x.InstallmentNumber).Take(2))
+									{
+										var isPending = s.Status == EmiStatus.Pending;
+
+										<tr class="@(isPending ? "bg-amber-500/5" : "") hover:bg-slate-700/30 transition-colors">
+											<td class="p-3 @(isPending ? "font-semibold text-amber-400" : "text-slate-400")">
+												@s.DueDate.ToString("yyyy-MM-dd")
+											</td>
+											<td class="p-3 font-semibold text-slate-200">₹@s.EmiAmount.ToString("N2")</td>
+											<td class="p-3 text-slate-400">₹@s.PrincipalComponent.ToString("N2")</td>
+											<td class="p-3 text-slate-400">₹@s.InterestComponent.ToString("N2")</td>
+											<td class="p-3">
+												@if (s.Status == EmiStatus.Paid)
+												{
+													<span class="px-2 py-0.5 rounded text-[10px] bg-emerald-500/20 text-emerald-400 font-semibold">PAID</span>
+												}
+												else if (s.Status == EmiStatus.Pending)
+												{
+													<span class="px-2 py-0.5 rounded text-[10px] bg-amber-500/20 text-amber-400 font-semibold">PENDING</span>
+												}
+												else
+												{
+													<span class="px-2 py-0.5 rounded text-[10px] bg-slate-500/20 text-slate-400 font-semibold">@s.Status</span>
+												}
+											</td>
+											<td class="p-3 text-right">
+												@if (s.Status == EmiStatus.Paid)
+												{
+													<span class="text-slate-500 text-[11px]">Settled</span>
+												}
+												else if (s.Status == EmiStatus.Pending)
+												{
+													<form method="post" action="/Customer/PayEmi" class="inline">
+														@Html.AntiForgeryToken()
+														<input type="hidden" name="id" value="@s.Id" />
+														<button type="submit" class="bg-emerald-600 hover:bg-emerald-500 text-white font-medium px-2.5 py-1 rounded text-xs transition-colors shadow">
+															Pay Now
+														</button>
+													</form>
+												}
+											</td>
+										</tr>
+									}
+								</tbody>
+							</table>
+						</div>
+					</div>
+				}
+			}
+		</div>
+	</section>
 </div>
-
-<!-- Inline JavaScript to toggle ToAccountNumber input -->
-<script>
-    function toggleTransferInput() {
-        const typeSelect = document.getElementById('transactionType');
-        const transferGroup = document.getElementById('transferAccountGroup');
-        if (typeSelect.value === 'Transfer') {
-            transferGroup.classList.remove('hidden');
-        } else {
-            transferGroup.classList.add('hidden');
-        }
-    }
-</script>
