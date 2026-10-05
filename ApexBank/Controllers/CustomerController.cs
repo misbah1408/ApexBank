@@ -43,6 +43,13 @@ public class CustomerController(AppDbContext d, IBankingService b, ILoanService 
             .Take(10)
             .ToListAsync();
 
+        ViewBag.TargetAccounts = await db.Accounts
+        .Include(a => a.CustomerProfile)
+        .Select(a => new Tuple<string, string>(
+            a.AccountNumber,
+            a.CustomerProfile.User.Name))
+        .ToListAsync();
+
         return View(c);
 
     }
