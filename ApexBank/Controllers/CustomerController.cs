@@ -36,12 +36,13 @@ public class CustomerController(AppDbContext d, IBankingService b, ILoanService 
                         r.DueDate <= DateTime.Now.AddDays(90)))
             .FirstOrDefaultAsync(x => x.UserId == UserId);
 
-        ViewBag.Transactions = await db.Transactions
-            .Include(x => x.Account)
-            .Where(x => x.Account.CustomerProfileId == c.Id)
-            .OrderByDescending(x => x.TransactionDate)
-            .Take(10)
-            .ToListAsync();
+        if (c != null)
+            ViewBag.Transactions = await db.Transactions
+                .Include(x => x.Account)
+                .Where(x => x.Account.CustomerProfileId == c.Id)
+                .OrderByDescending(x => x.TransactionDate)
+                .Take(10)
+                .ToListAsync();
 
         ViewBag.TargetAccounts = await db.Accounts
         .Include(a => a.CustomerProfile)
@@ -88,6 +89,17 @@ public class CustomerController(AppDbContext d, IBankingService b, ILoanService 
             ModelState.AddModelError("", "Enter valid loan amount and tenure.");
             return View(m);
         }
+        bool loanExists = await db.Loans
+            .Include(x => x.CustomerProfile)
+            .AnyAsync(x => x.CustomerProfile.UserId == UserId &&
+                           x.LoanType == m.LoanType);
+
+        if (loanExists)
+        {
+            TempData["Error"] = "Loan with this type already exists";
+            return View(m); // or your appropriate action
+        }
+
 
         var c = await db.CustomerProfiles.FirstAsync(x => x.UserId == UserId);
         var score = 650 + Random.Shared.Next(0, 131);
@@ -115,6 +127,20 @@ public class CustomerController(AppDbContext d, IBankingService b, ILoanService 
         return RedirectToAction("Dashboard");
     }
 
+    public async Task<IActionResult> Loans()
+    {
+        var c = await db.CustomerProfiles
+            .Include(x => x.User)
+            .Include(x => x.Accounts)
+            .Include(x => x.Loans)
+                .ThenInclude(l => l.RepaymentSchedules
+                    .Where(r =>
+                        r.DueDate >= DateTime.Now.AddDays(-60) &&
+                        r.DueDate <= DateTime.Now.AddDays(90)))
+            .FirstOrDefaultAsync(x => x.UserId == UserId);
+
+        return View(c);
+    }
     [HttpPost]
 
     public async Task<IActionResult> PayEmi(int id)

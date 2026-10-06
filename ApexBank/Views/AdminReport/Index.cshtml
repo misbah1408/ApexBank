@@ -1,0 +1,297 @@
+@model ApexBank.ViewModels.AdminReportViewModel
+
+@{
+    ViewData["Title"] = "Reports";
+}
+
+<div class="flex justify-between items-center mb-6">
+
+    <div>
+        <a asp-controller="Admin" asp-action="Index" class="text-blue-400">
+            ← Back to Reports
+        </a>
+        <h1 class="text-3xl font-bold">
+            Admin · Reports
+        </h1>
+
+        <p class="text-slate-400 mt-1">
+            Bank-wide financial and operational reports
+        </p>
+    </div>
+
+</div>
+
+
+<!-- ========================= -->
+<!-- OVERVIEW -->
+<!-- ========================= -->
+
+<h2 class="text-xl font-semibold mb-4">
+    Bank Overview
+</h2>
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+
+    <div class="bg-slate-900 rounded-xl p-5">
+        <p class="text-slate-400 text-sm">
+            Total Customers
+        </p>
+
+        <p class="text-3xl font-bold mt-2">
+            @Model.TotalCustomers
+        </p>
+    </div>
+
+
+    <div class="bg-slate-900 rounded-xl p-5">
+        <p class="text-slate-400 text-sm">
+            Total Accounts
+        </p>
+
+        <p class="text-3xl font-bold mt-2">
+            @Model.TotalAccounts
+        </p>
+    </div>
+
+
+    <div class="bg-slate-900 rounded-xl p-5">
+        <p class="text-slate-400 text-sm">
+            Total Deposits
+        </p>
+
+        <p class="text-3xl font-bold mt-2 text-green-400">
+            ₹@Model.TotalDeposits.ToString("N2")
+        </p>
+    </div>
+
+
+    <div class="bg-slate-900 rounded-xl p-5">
+        <p class="text-slate-400 text-sm">
+            Total Withdrawals
+        </p>
+
+        <p class="text-3xl font-bold mt-2 text-red-400">
+            ₹@Model.TotalWithdrawals.ToString("N2")
+        </p>
+    </div>
+
+</div>
+
+
+<!-- ========================= -->
+<!-- LOANS -->
+<!-- ========================= -->
+
+<h2 class="text-xl font-semibold mb-4">
+    Loan Overview
+</h2>
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+
+    <div class="bg-slate-900 rounded-xl p-5">
+        <p class="text-slate-400 text-sm">
+            Total Loans
+        </p>
+
+        <p class="text-3xl font-bold mt-2">
+            @Model.TotalLoans
+        </p>
+    </div>
+
+
+    <div class="bg-slate-900 rounded-xl p-5">
+        <p class="text-slate-400 text-sm">
+            Applied
+        </p>
+
+        <p class="text-3xl font-bold mt-2 text-yellow-400">
+            @Model.AppliedLoans
+        </p>
+    </div>
+
+
+    <div class="bg-slate-900 rounded-xl p-5">
+        <p class="text-slate-400 text-sm">
+            Approved
+        </p>
+
+        <p class="text-3xl font-bold mt-2 text-green-400">
+            @Model.ApprovedLoans
+        </p>
+    </div>
+
+
+    <div class="bg-slate-900 rounded-xl p-5">
+        <p class="text-slate-400 text-sm">
+            Rejected
+        </p>
+
+        <p class="text-3xl font-bold mt-2 text-red-400">
+            @Model.RejectedLoans
+        </p>
+    </div>
+
+
+    <div class="bg-slate-900 rounded-xl p-5">
+        <p class="text-slate-400 text-sm">
+            Approved Amount
+        </p>
+
+        <p class="text-xl font-bold mt-2">
+            ₹@Model.TotalApprovedLoanAmount.ToString("N2")
+        </p>
+    </div>
+
+</div>
+
+
+<!-- ========================= -->
+<!-- REPAYMENT -->
+<!-- ========================= -->
+
+<h2 class="text-xl font-semibold mb-4">
+    Repayment Overview
+</h2>
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+
+    <div class="bg-slate-900 rounded-xl p-5">
+        <p class="text-slate-400 text-sm">
+            Paid EMIs
+        </p>
+
+        <p class="text-3xl font-bold mt-2 text-green-400">
+            @Model.PaidEMIs
+        </p>
+    </div>
+
+
+    <div class="bg-slate-900 rounded-xl p-5">
+        <p class="text-slate-400 text-sm">
+            Upcoming EMIs
+        </p>
+
+        <p class="text-3xl font-bold mt-2 text-blue-400">
+            @Model.UpcomingEMIs
+        </p>
+    </div>
+
+
+    <div class="bg-slate-900 rounded-xl p-5">
+        <p class="text-slate-400 text-sm">
+            Overdue EMIs
+        </p>
+
+        <p class="text-3xl font-bold mt-2 text-red-400">
+            @Model.OverdueEMIs
+        </p>
+    </div>
+
+
+    <div class="bg-slate-900 rounded-xl p-5">
+        <p class="text-slate-400 text-sm">
+            Principal Paid
+        </p>
+
+        <p class="text-xl font-bold mt-2">
+            ₹@Model.TotalPrincipalPaid.ToString("N2")
+        </p>
+    </div>
+
+
+    <div class="bg-slate-900 rounded-xl p-5">
+        <p class="text-slate-400 text-sm">
+            Interest Paid
+        </p>
+
+        <p class="text-xl font-bold mt-2">
+            ₹@Model.TotalInterestPaid.ToString("N2")
+        </p>
+    </div>
+
+</div>
+
+
+<!-- ========================= -->
+<!-- REPORT LINKS -->
+<!-- ========================= -->
+
+<h2 class="text-xl font-semibold mb-4">
+    Reports
+</h2>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+
+    <a asp-action="Transactions" class="bg-slate-900 hover:bg-slate-800
+        rounded-xl p-6 block">
+
+        <h3 class="text-xl font-semibold">
+            Transaction Report
+        </h3>
+
+        <p class="text-slate-400 mt-2">
+            View deposits, withdrawals and transfers.
+        </p>
+
+        <span class="text-blue-400 mt-4 inline-block">
+            View Report →
+        </span>
+
+    </a>
+
+
+    <a asp-action="Loans" class="bg-slate-900 hover:bg-slate-800
+        rounded-xl p-6 block">
+
+        <h3 class="text-xl font-semibold">
+            Loan Report
+        </h3>
+
+        <p class="text-slate-400 mt-2">
+            View applied, approved and rejected loans.
+        </p>
+
+        <span class="text-blue-400 mt-4 inline-block">
+            View Report →
+        </span>
+
+    </a>
+
+
+    <a asp-action="Repayments" class="bg-slate-900 hover:bg-slate-800
+        rounded-xl p-6 block">
+
+        <h3 class="text-xl font-semibold">
+            Repayment Report
+        </h3>
+
+        <p class="text-slate-400 mt-2">
+            View paid, upcoming and overdue EMIs.
+        </p>
+
+        <span class="text-blue-400 mt-4 inline-block">
+            View Report →
+        </span>
+
+    </a>
+
+
+    <a asp-action="AuditLogs" class="bg-slate-900 hover:bg-slate-800
+        rounded-xl p-6 block">
+
+        <h3 class="text-xl font-semibold">
+            Audit Report
+        </h3>
+
+        <p class="text-slate-400 mt-2">
+            Monitor system activity and audit logs.
+        </p>
+
+        <span class="text-blue-400 mt-4 inline-block">
+            View Report →
+        </span>
+
+    </a>
+
+</div>

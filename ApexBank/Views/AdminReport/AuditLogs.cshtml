@@ -1,0 +1,155 @@
+@model IEnumerable<ApexBank.Models.AuditLog>
+
+@{
+    ViewData["Title"] = "Audit Report";
+}
+
+<div class="mb-6">
+
+    <a asp-action="Index" class="text-blue-400">
+        ← Back to Reports
+    </a>
+
+    <h1 class="text-3xl font-bold mt-3">
+        Audit Report
+    </h1>
+
+    <p class="text-slate-400 mt-1">
+        Monitor system activities and user actions.
+    </p>
+
+</div>
+
+
+<div class="bg-slate-900 rounded-xl p-5 mb-6">
+
+    <form method="get" asp-action="AuditLogs" class="grid grid-cols-1 md:grid-cols-5 gap-4">
+
+        <div>
+
+            <label class="text-sm text-slate-400">
+                From
+            </label>
+
+            <input type="date" name="from" value="@ViewBag.From" class="w-full mt-1 bg-slate-800
+            border border-slate-700
+            rounded-lg p-2" />
+
+        </div>
+
+
+        <div>
+
+            <label class="text-sm text-slate-400">
+                To
+            </label>
+
+            <input type="date" name="to" value="@ViewBag.To" class="w-full mt-1 bg-slate-800
+            border border-slate-700
+            rounded-lg p-2" />
+
+        </div>
+
+
+        @* <div>
+
+            <label class="text-sm text-slate-400">
+                Module
+            </label>
+
+            <input type="text" name="module" value="@ViewBag.Module" placeholder="LOAN" class="w-full mt-1 bg-slate-800
+            border border-slate-700
+            rounded-lg p-2" />
+
+        </div>
+
+
+        <div>
+
+            <label class="text-sm text-slate-400">
+                Action
+            </label>
+
+            <input type="text" name="action" value="@ViewBag.Action" placeholder="APPROVE" class="w-full mt-1 bg-slate-800
+            border border-slate-700
+            rounded-lg p-2" />
+
+        </div> *@
+
+
+        <div class="flex items-end">
+
+            <button type="submit" class="w-full bg-blue-600
+                rounded-lg p-2">
+
+                Filter
+
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+
+
+<div class="bg-slate-900 rounded-xl p-5 overflow-x-auto">
+
+    <table class="w-full">
+
+        <thead>
+
+            <tr class="text-left text-slate-400">
+
+                <th class="pb-3">
+                    User
+                </th>
+
+                <th>
+                    Module
+                </th>
+
+                <th>
+                    Action
+                </th>
+
+                <th>
+                    Timestamp
+                </th>
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            @foreach (var log in Model)
+            {
+                <tr class="border-t border-slate-800">
+
+                    <td class="py-3">
+                        @log.PerformedBy
+                    </td>
+
+                    <td>
+                        @log.Module
+                    </td>
+
+                    <td>
+                        @log.ActionPerformed
+                    </td>
+
+
+                    <td>
+                        @log.LogDate.ToString(
+                            "dd-MM-yyyy HH:mm:ss")
+                    </td>
+
+                </tr>
+            }
+
+        </tbody>
+
+    </table>
+
+</div>
