@@ -1,0 +1,200 @@
+@using ApexBank.Enums
+@model IEnumerable<ApexBank.Models.RepaymentSchedule>
+@{
+    ViewData["Title"] = "Repayment Report";
+}
+
+<div class="mb-6">
+
+    <a asp-action="Index"
+       class="text-blue-400">
+        ← Back to Reports
+    </a>
+
+    <h1 class="text-3xl font-bold mt-3">
+        Repayment Report
+    </h1>
+
+</div>
+
+
+<div class="bg-slate-900 rounded-xl p-5 mb-6">
+
+    <form method="get"
+          asp-action="Repayments"
+          class="grid grid-cols-1 md:grid-cols-4 gap-4">
+
+        <div>
+
+            <label class="text-sm text-slate-400">
+                From
+            </label>
+
+            <input type="date"
+                   name="from"
+                   value="@ViewBag.From"
+                   class="w-full mt-1 bg-slate-800
+                          border border-slate-700
+                          rounded-lg p-2" />
+
+        </div>
+
+
+        <div>
+
+            <label class="text-sm text-slate-400">
+                To
+            </label>
+
+            <input type="date"
+                   name="to"
+                   value="@ViewBag.To"
+                   class="w-full mt-1 bg-slate-800
+                          border border-slate-700
+                          rounded-lg p-2" />
+
+        </div>
+
+
+        <div>
+
+            <label class="text-sm text-slate-400">
+                Status
+            </label>
+
+            <select name="status"
+                    class="w-full mt-1 bg-slate-800
+                           border border-slate-700
+                           rounded-lg p-2">
+
+                <option value="">
+                    All
+                </option>
+
+                <option value="Paid">
+                    Paid
+                </option>
+
+                <option value="Upcoming">
+                    Upcoming
+                </option>
+
+                <option value="Overdue">
+                    Overdue
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <div class="flex items-end">
+
+            <button type="submit"
+                    class="w-full bg-blue-600
+                           rounded-lg p-2">
+
+                Filter
+
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+
+
+<div class="bg-slate-900 rounded-xl p-5 overflow-x-auto">
+
+    <table class="w-full">
+
+        <thead>
+
+            <tr class="text-left text-slate-400">
+
+                <th class="pb-3">
+                    EMI No
+                </th>
+
+                <th>
+                    Due Date
+                </th>
+
+                <th>
+                    Principal
+                </th>
+
+                <th>
+                    Interest
+                </th>
+
+                <th>
+                    Total EMI
+                </th>
+
+                <th>
+                    Status
+                </th>
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+        @foreach (var emi in Model)
+        {
+            <tr class="border-t border-slate-800">
+
+                <td class="py-3">
+                    @emi.InstallmentNumber
+                </td>
+
+                <td>
+                    @emi.DueDate.ToString("dd-MM-yyyy")
+                </td>
+
+                <td>
+                    ₹@emi.PrincipalComponent.ToString("N2")
+                </td>
+
+                <td>
+                    ₹@emi.InterestComponent.ToString("N2")
+                </td>
+
+                <td>
+                    ₹@emi.EmiAmount.ToString("N2")
+                </td>
+
+                <td>
+
+                    @if (emi.Status == EmiStatus.Paid)
+                    {
+                        <span class="text-green-400">
+                            Paid
+                        </span>
+                    }
+                    else if (emi.Status == EmiStatus.Overdue)
+                    {
+                        <span class="text-red-400">
+                            Overdue
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="text-blue-400">
+                            Upcoming
+                        </span>
+                    }
+
+                </td>
+
+            </tr>
+        }
+
+        </tbody>
+
+    </table>
+
+</div>

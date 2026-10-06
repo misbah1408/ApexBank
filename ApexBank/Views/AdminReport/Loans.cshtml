@@ -1,0 +1,177 @@
+@model IEnumerable<ApexBank.Models.Loan>
+
+@{
+    ViewData["Title"] = "Loan Report";
+}
+
+<div class="mb-6">
+
+    <a asp-action="Index" class="text-blue-400">
+        ← Back to Reports
+    </a>
+
+    <h1 class="text-3xl font-bold mt-3">
+        Loan Report
+    </h1>
+
+</div>
+
+
+<div class="bg-slate-900 rounded-xl p-5 mb-6">
+
+    <form method="get" asp-action="Loans" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+
+        <div>
+
+            <label class="text-sm text-slate-400">
+                From
+            </label>
+
+            <input type="date" name="from" value="@ViewBag.From" class="w-full mt-1 bg-slate-800
+            border border-slate-700
+            rounded-lg p-2" />
+
+        </div>
+
+
+        <div>
+
+            <label class="text-sm text-slate-400">
+                To
+            </label>
+
+            <input type="date" name="to" value="@ViewBag.To" class="w-full mt-1 bg-slate-800
+            border border-slate-700
+            rounded-lg p-2" />
+
+        </div>
+
+
+        <div>
+
+            <label class="text-sm text-slate-400">
+                Status
+            </label>
+
+            <select name="status" class="w-full mt-1 bg-slate-800
+                border border-slate-700
+                rounded-lg p-2">
+
+                <option value="">
+                    All
+                </option>
+
+                <option value="Applied">
+                    Applied
+                </option>
+
+                <option value="Approved">
+                    Approved
+                </option>
+
+                <option value="Rejected">
+                    Rejected
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <div class="flex items-end">
+
+            <button type="submit" class="w-full bg-blue-600
+                rounded-lg p-2">
+
+                Filter
+
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+
+
+<div class="bg-slate-900 rounded-xl p-5 overflow-x-auto">
+
+    <table class="w-full">
+
+        <thead>
+
+            <tr class="text-left text-slate-400">
+                <th class="pb-3">
+                    Loan Id
+                </th>
+
+                <th>
+                    Applicant
+                </th>
+
+                <th>
+                    Loan Type
+                </th>
+
+                <th>
+                    Amount
+                </th>
+
+                <th>
+                    Tenure
+                </th>
+
+                <th>
+                    Status
+                </th>
+
+                <th>
+                    Applied Date
+                </th>
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            @foreach (var loan in Model)
+            {
+                <tr class="border-t border-slate-800">
+
+                    <td class="py-3">
+                        @loan.LoanNumber
+                    </td>
+
+                    <td>
+                        @loan.CustomerProfile?.User?.Name
+                    </td>
+
+                    <td>
+                        @loan.LoanType
+                    </td>
+
+                    <td>
+                        ₹@loan.PrincipalAmount.ToString("N2")
+                    </td>
+
+                    <td>
+                        @loan.TenureMonths months
+                    </td>
+
+                    <td>
+                        @loan.Status
+                    </td>
+
+                    <td>
+                        @loan.AppliedDate.ToString("dd-MM-yyyy")
+                    </td>
+
+                </tr>
+            }
+
+        </tbody>
+
+    </table>
+
+</div>

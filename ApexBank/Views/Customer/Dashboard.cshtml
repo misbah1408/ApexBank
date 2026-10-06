@@ -13,9 +13,14 @@
 		<h1 class="text-3xl font-bold tracking-tight">Customer Dashboard</h1>
 		<p class="text-slate-400">Welcome back, <span class="text-slate-200 font-semibold">@Model.User.Name</span></p>
 	</div>
-	<a href="/Customer/ApplyLoan" class="bg-blue-600 hover:bg-blue-500 text-white font-medium px-4 py-2 rounded-lg transition-colors flex items-center gap-2">
-		<i class="fa-solid fa-plus text-xs"></i> Apply For Loan
-	</a>
+	<div class="flex justify-center items-center gap-2">
+		<a href="/Customer/Loans" class="bg-blue-600 hover:bg-blue-500 text-white font-medium px-4 py-2 rounded-lg transition-colors flex items-center gap-2">
+			<i class="fa-solid fa-plus text-xs"></i> Loans
+		</a>
+		<a href="/Customer/ApplyLoan" class="bg-blue-600 hover:bg-blue-500 text-white font-medium px-4 py-2 rounded-lg transition-colors flex items-center gap-2">
+			<i class="fa-solid fa-plus text-xs"></i> Apply For Loan
+		</a>
+	</div>
 </div>
 
 <!-- Account Summary Cards -->
@@ -256,83 +261,6 @@
 		</div>
 
 		<!-- Active EMI Repayment Schedules -->
-		<div>
-			@if (!activeLoans.Any())
-			{
-				<div class="p-4 rounded-xl border border-slate-700 bg-slate-900/30 text-slate-500 text-xs text-center">
-					No active loan schedules found.
-				</div>
-			}
-			else
-			{
-				@foreach (var l in activeLoans)
-				{
-					<div class="mb-6 last:mb-0">
-						<h3 class="text-sm font-bold mb-3 flex items-center gap-2 text-slate-200">
-							<i class="fa-solid fa-calendar-check text-amber-500"></i> Active EMI Schedule (@l.LoanType Loan - Ref #@l.Id)
-						</h3>
-						<div class="overflow-x-auto rounded-lg border border-slate-700/60">
-							<table class="w-full text-left text-xs">
-								<thead class="bg-slate-900 text-slate-400 uppercase tracking-wider font-semibold">
-									<tr>
-										<th class="p-3">Due Date</th>
-										<th class="p-3">EMI Amount</th>
-										<th class="p-3">Principal</th>
-										<th class="p-3">Interest</th>
-										<th class="p-3">Status</th>
-										<th class="p-3 text-right">Action</th>
-									</tr>
-								</thead>
-								<tbody class="divide-y divide-slate-700/50 bg-slate-800/50">
-									@foreach (var s in l.RepaymentSchedules.OrderBy(x => x.InstallmentNumber).Take(2))
-									{
-										var isPending = s.Status == EmiStatus.Pending;
-
-										<tr class="@(isPending ? "bg-amber-500/5" : "") hover:bg-slate-700/30 transition-colors">
-											<td class="p-3 @(isPending ? "font-semibold text-amber-400" : "text-slate-400")">
-												@s.DueDate.ToString("yyyy-MM-dd")
-											</td>
-											<td class="p-3 font-semibold text-slate-200">₹@s.EmiAmount.ToString("N2")</td>
-											<td class="p-3 text-slate-400">₹@s.PrincipalComponent.ToString("N2")</td>
-											<td class="p-3 text-slate-400">₹@s.InterestComponent.ToString("N2")</td>
-											<td class="p-3">
-												@if (s.Status == EmiStatus.Paid)
-												{
-													<span class="px-2 py-0.5 rounded text-[10px] bg-emerald-500/20 text-emerald-400 font-semibold">PAID</span>
-												}
-												else if (s.Status == EmiStatus.Pending)
-												{
-													<span class="px-2 py-0.5 rounded text-[10px] bg-amber-500/20 text-amber-400 font-semibold">PENDING</span>
-												}
-												else
-												{
-													<span class="px-2 py-0.5 rounded text-[10px] bg-slate-500/20 text-slate-400 font-semibold">@s.Status</span>
-												}
-											</td>
-											<td class="p-3 text-right">
-												@if (s.Status == EmiStatus.Paid)
-												{
-													<span class="text-slate-500 text-[11px]">Settled</span>
-												}
-												else if (s.Status == EmiStatus.Pending)
-												{
-													<form method="post" action="/Customer/PayEmi" class="inline">
-														@Html.AntiForgeryToken()
-														<input type="hidden" name="id" value="@s.Id" />
-														<button type="submit" class="bg-emerald-600 hover:bg-emerald-500 text-white font-medium px-2.5 py-1 rounded text-xs transition-colors shadow">
-															Pay Now
-														</button>
-													</form>
-												}
-											</td>
-										</tr>
-									}
-								</tbody>
-							</table>
-						</div>
-					</div>
-				}
-			}
-		</div>
+		
 	</section>
 </div>

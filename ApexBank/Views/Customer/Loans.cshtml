@@ -1,0 +1,215 @@
+﻿@model ApexBank.Models.CustomerProfile
+@using ApexBank.Enums
+@{
+	var loans = Model.Loans?.ToList() ?? new List<Loan>();
+	var approvedLoans = loans.Where(x => x.Status == LoanStatus.Approved).ToList();
+	var pendingLoans = loans.Where(x => x.Status == LoanStatus.Applied).ToList();
+	var rejectedLoans = loans.Where(x => x.Status == LoanStatus.Rejected).ToList();
+}
+<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+	<div>
+		<h1 class="text-3xl font-bold tracking-tight">Loan Dashboard</h1>
+	</div>
+		<a href="/Customer/ApplyLoan" class="bg-blue-600 hover:bg-blue-500 text-white font-medium px-4 py-2 rounded-lg transition-colors flex items-center gap-2">
+			<i class="fa-solid fa-plus text-xs"></i> Apply For Loan
+		</a>
+</div>
+<div class="space-y-10">
+
+	@if (!loans.Any())
+	{
+		<div class="p-8 rounded-2xl border border-dashed border-slate-700 bg-slate-900/40 text-slate-400 text-center flex flex-col items-center justify-center gap-2">
+			<i class="fa-solid fa-folder-open text-3xl text-slate-600 mb-1"></i>
+			<span class="text-sm font-semibold">No Loan Applications Found</span>
+			<span class="text-xs text-slate-500">You currently have no active, pending, or rejected loans.</span>
+		</div>
+	}
+
+	<!-- ROOM 1: APPROVED LOANS -->
+	@if (approvedLoans.Any())
+	{
+		<div class="space-y-4">
+			<h2 class="text-sm font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-2">
+				<i class="fa-solid fa-circle-check"></i> Approved & Active Loans (@approvedLoans.Count)
+			</h2>
+
+			@foreach (var l in approvedLoans)
+			{
+				<div class="rounded-2xl border border-slate-700/80 bg-slate-900/80 overflow-hidden shadow-xl">
+					<!-- Top Card Header -->
+					<div class="p-6 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border-b border-slate-700/60 flex flex-wrap items-center justify-between gap-4">
+						<div class="flex items-center gap-3">
+							<div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-xl font-bold">
+								<i class="fa-solid fa-landmark"></i>
+							</div>
+							<div>
+								<div class="flex items-center gap-2">
+									<h3 class="text-base font-bold text-slate-100">@l.LoanType Loan</h3>
+									<span class="px-2.5 py-0.5 rounded-full text-[10px] bg-emerald-500/20 text-emerald-400 font-bold uppercase border border-emerald-500/30">
+										APPROVED
+									</span>
+								</div>
+								<p class="text-xs text-slate-400 font-mono">Acc: @l.LoanNumber &bull; Applied: @l.AppliedDate.ToString("yyyy-MM-dd")</p>
+							</div>
+						</div>
+
+						<div class="text-right">
+							<span class="text-[11px] uppercase font-semibold text-slate-400 block">Balance Remaining</span>
+							<span class="text-2xl font-black text-amber-400">₹@l.BalanceRemaining.ToString("N2")</span>
+						</div>
+					</div>
+
+					<!-- Metrics Grid -->
+					<div class="p-6 bg-slate-900/50">
+						<div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+							<div class="p-3 rounded-xl bg-slate-800/80 border border-slate-700/50">
+								<span class="text-[10px] uppercase font-semibold text-slate-400 block">Principal</span>
+								<span class="text-sm font-bold text-slate-200">₹@l.PrincipalAmount.ToString("N2")</span>
+							</div>
+							<div class="p-3 rounded-xl bg-slate-800/80 border border-slate-700/50">
+								<span class="text-[10px] uppercase font-semibold text-slate-400 block">Interest Rate</span>
+								<span class="text-sm font-bold text-slate-200">@l.InterestRate.ToString("0.00")% p.a.</span>
+							</div>
+							<div class="p-3 rounded-xl bg-slate-800/80 border border-slate-700/50">
+								<span class="text-[10px] uppercase font-semibold text-slate-400 block">Tenure</span>
+								<span class="text-sm font-bold text-slate-200">@l.TenureMonths Months</span>
+							</div>
+							<div class="p-3 rounded-xl bg-slate-800/80 border border-slate-700/50">
+								<span class="text-[10px] uppercase font-semibold text-slate-400 block">Monthly EMI</span>
+								<span class="text-sm font-bold text-emerald-400">₹@l.EmiAmount.ToString("N2")</span>
+							</div>
+						</div>
+
+						<!-- EMI Schedule -->
+						<h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+							<i class="fa-solid fa-calendar-check text-amber-500"></i> Active EMI Schedule
+						</h4>
+						<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+							@foreach (var s in l.RepaymentSchedules.OrderBy(x => x.InstallmentNumber).Take(2))
+							{
+								var isPending = s.Status == EmiStatus.Pending;
+
+								<div class="p-3.5 rounded-xl border @(isPending ? "border-amber-500/40 bg-amber-500/5" : "border-slate-700/60 bg-slate-800/30") flex items-center justify-between">
+									<div>
+										<div class="text-xs font-bold text-slate-200">Due @s.DueDate.ToString("yyyy-MM-dd")</div>
+										<div class="text-[11px] text-slate-400 mt-0.5">
+											EMI: <span class="text-amber-400 font-semibold">₹@s.EmiAmount.ToString("N2")</span>
+										</div>
+									</div>
+
+									<div>
+										@if (isPending)
+										{
+											<form method="post" action="/Customer/PayEmi">
+												@Html.AntiForgeryToken()
+												<input type="hidden" name="id" value="@s.Id" />
+												<button type="submit" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs rounded-lg transition-colors shadow">
+													Pay Now
+												</button>
+											</form>
+										}
+										else
+										{
+											<span class="px-2 py-0.5 rounded text-[10px] bg-emerald-500/20 text-emerald-400 font-bold">PAID</span>
+										}
+									</div>
+								</div>
+							}
+						</div>
+					</div>
+				</div>
+			}
+		</div>
+	}
+
+	<!-- ROOM 2: APPLIED / PENDING LOANS -->
+	@if (pendingLoans.Any())
+	{
+		<div class="space-y-4">
+			<h2 class="text-sm font-bold uppercase tracking-wider text-amber-400 flex items-center gap-2">
+				<i class="fa-solid fa-hourglass-half"></i> Under Review / Applied (@pendingLoans.Count)
+			</h2>
+
+			<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+				@foreach (var l in pendingLoans)
+				{
+					<div class="p-5 rounded-2xl border border-amber-500/30 bg-amber-500/5 relative overflow-hidden flex flex-col justify-between">
+						<div>
+							<div class="flex items-center justify-between mb-3">
+								<span class="text-xs font-mono text-slate-400">#@l.LoanNumber</span>
+								<span class="px-2.5 py-0.5 rounded-full text-[10px] bg-amber-500/20 text-amber-400 font-bold uppercase border border-amber-500/30">
+									APPLIED / PENDING
+								</span>
+							</div>
+
+							<h3 class="text-base font-bold text-slate-100 mb-1">@l.LoanType Loan</h3>
+							<p class="text-xs text-slate-400 mb-4">Applied on @l.AppliedDate.ToString("MMM dd, yyyy")</p>
+
+							<div class="grid grid-cols-2 gap-2 text-xs mb-4 p-3 bg-slate-900/60 rounded-xl border border-slate-700/50">
+								<div>
+									<span class="text-slate-400 block text-[10px] uppercase">Requested</span>
+									<span class="font-bold text-slate-200">₹@l.PrincipalAmount.ToString("N2")</span>
+								</div>
+								<div>
+									<span class="text-slate-400 block text-[10px] uppercase">Tenure</span>
+									<span class="font-bold text-slate-200">@l.TenureMonths Months</span>
+								</div>
+							</div>
+						</div>
+
+						<div class="text-[11px] text-amber-300/80 bg-amber-500/10 p-2.5 rounded-lg border border-amber-500/20 flex items-center gap-2">
+							<i class="fa-solid fa-circle-info"></i>
+							<span>Your application is currently under review by our credit underwriting team.</span>
+						</div>
+					</div>
+				}
+			</div>
+		</div>
+	}
+
+	<!-- ROOM 3: REJECTED LOANS -->
+	@if (rejectedLoans.Any())
+	{
+		<div class="space-y-4">
+			<h2 class="text-sm font-bold uppercase tracking-wider text-rose-400 flex items-center gap-2">
+				<i class="fa-solid fa-circle-xmark"></i> Rejected Applications (@rejectedLoans.Count)
+			</h2>
+
+			<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+				@foreach (var l in rejectedLoans)
+				{
+					<div class="p-5 rounded-2xl border border-rose-500/30 bg-rose-500/5 flex flex-col justify-between">
+						<div>
+							<div class="flex items-center justify-between mb-3">
+								<span class="text-xs font-mono text-slate-400">#@l.LoanNumber</span>
+								<span class="px-2.5 py-0.5 rounded-full text-[10px] bg-rose-500/20 text-rose-400 font-bold uppercase border border-rose-500/30">
+									REJECTED
+								</span>
+							</div>
+
+							<h3 class="text-base font-bold text-slate-100 mb-1">@l.LoanType Loan</h3>
+							<p class="text-xs text-slate-400 mb-4">Applied on @l.AppliedDate.ToString("MMM dd, yyyy")</p>
+
+							<div class="grid grid-cols-2 gap-2 text-xs mb-4 p-3 bg-slate-900/60 rounded-xl border border-slate-700/50">
+								<div>
+									<span class="text-slate-400 block text-[10px] uppercase">Amount</span>
+									<span class="font-bold text-slate-200">₹@l.PrincipalAmount.ToString("N2")</span>
+								</div>
+								<div>
+									<span class="text-slate-400 block text-[10px] uppercase">Tenure</span>
+									<span class="font-bold text-slate-200">@l.TenureMonths Months</span>
+								</div>
+							</div>
+						</div>
+
+						<div class="text-xs text-rose-300 bg-rose-950/40 p-3 rounded-xl border border-rose-500/20">
+							<span class="font-bold block mb-0.5 text-rose-400 text-[10px] uppercase tracking-wider">Reason for Rejection</span>
+							<p class="text-slate-300">@(string.IsNullOrWhiteSpace(l.RejectionReason) ? "Application did not meet bank eligibility requirements." : l.RejectionReason)</p>
+						</div>
+					</div>
+				}
+			</div>
+		</div>
+	}
+
+</div>

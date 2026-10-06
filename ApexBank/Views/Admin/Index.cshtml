@@ -1,6 +1,14 @@
 ﻿<div class="flex justify-between mb-6">
     <h1 class="text-3xl font-bold">Admin · Staff Management</h1>
-    <a href="/Admin/CreateStaff" class="bg-blue-600 px-4 py-2 rounded">Create Staff</a>
+    <div class="flex justify-center items-center gap-2">
+        <a asp-controller="AdminReport" asp-action="Index" class="flex items-center gap-3
+            px-4 py-2 rounded
+            bg-blue-600">
+            <span>📊</span>
+            <span>Reports</span>
+        </a>
+        <a href="/Admin/CreateStaff" class="bg-blue-600 px-4 py-2 rounded">Create Staff</a>
+    </div>
 </div>
 <div class="bg-slate-900 rounded-xl p-5">
     <table class="w-full">

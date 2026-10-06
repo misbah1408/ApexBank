@@ -50,3 +50,30 @@ public class StaffVm
     public DateTime DateOfBirth { get; set; } = DateTime.Today.AddYears(-25);
     public Role Role { get; set; } = Role.Teller;
 }
+
+public class AdminReportViewModel
+{
+    // Dashboard
+    public int TotalCustomers { get; set; }
+    public int TotalAccounts { get; set; }
+
+    public decimal TotalDeposits { get; set; }
+    public decimal TotalWithdrawals { get; set; }
+    public decimal TotalTransfers { get; set; }
+
+    // Loans
+    public int TotalLoans { get; set; }
+    public int AppliedLoans { get; set; }
+    public int ApprovedLoans { get; set; }
+    public int RejectedLoans { get; set; }
+
+    public decimal TotalApprovedLoanAmount { get; set; }
+
+    // Repayment
+    public int PaidEMIs { get; set; }
+    public int UpcomingEMIs { get; set; }
+    public int OverdueEMIs { get; set; }
+
+    public decimal TotalPrincipalPaid { get; set; }
+    public decimal TotalInterestPaid { get; set; }
+}

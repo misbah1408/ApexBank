@@ -35,12 +35,25 @@
 	<main class="max-w-7xl mx-auto p-6">
 		@if (TempData["Success"] != null)
 		{
-			<div class="bg-emerald-900/50 border border-emerald-700 p-3 rounded mb-5">@TempData["Success"]</div>
+			<div class="bg-emerald-900/50 border border-emerald-700 p-3 rounded mb-5 alert flex items-center justify-between">
+				<span>@TempData["Success"]</span>
+
+				<button type="button" onclick="this.parentElement.remove()"
+						class="ml-4 text-emerald-300 hover:text-white text-xl font-bold leading-none">
+					&times;
+				</button>
+			</div>
 		}
+
 		@if (TempData["Error"] != null)
 		{
-			<div class="bg-red-900/50 border border-red-700 p-3 rounded mb-5">
-				@TempData["Error"]
+			<div class="bg-red-900/50 border border-red-700 p-3 rounded mb-5 alert flex items-center justify-between">
+				<span>@TempData["Error"]</span>
+
+				<button type="button" onclick="this.parentElement.remove()"
+						class="ml-4 text-red-300 hover:text-white text-xl font-bold leading-none">
+					&times;
+				</button>
 			</div>
 		}
 		@RenderBody()
