@@ -1,5 +1,7 @@
-﻿<h1 class="text-3xl font-bold mb-6">Auditor Dashboard</h1>
-
+﻿<div class="flex justify-between mb-6">
+	<h1 class="text-3xl font-bold">Auditor Dashboard</h1>
+    <a asp-action="Loans" class="bg-blue-600 px-4 py-2 rounded">Loans</a>
+</div>
 
 
 <div id="view-auditor" class="role-view space-y-6">
@@ -25,9 +27,53 @@
 
 	<!-- Immutable Audit Trail -->
 	<div class="bg-slate-800 p-6 rounded-2xl border border-slate-700">
-		<h2 class="text-lg font-bold mb-4 flex items-center gap-2">
-			<i class="fa-solid fa-shield-halved text-red-400"></i> Immutable Audit Log (`AuditLog`)
-		</h2>
+
+			<h2 class="text-lg font-bold mb-4 flex items-center gap-2">
+				<i class="fa-solid fa-shield-halved text-red-400"></i> Immutable Audit Log (`AuditLog`)
+			</h2>
+			<div class="bg-slate-900 rounded-xl p-5 mb-6">
+
+    <form method="get" asp-action="Index" class="grid grid-cols-1 md:grid-cols-5 gap-4">
+
+        <div>
+
+            <label class="text-sm text-slate-400">
+                From
+            </label>
+
+            <input type="date" name="from" value="@ViewBag.From" class="w-full mt-1 bg-slate-800
+            border border-slate-700
+            rounded-lg p-2" />
+
+        </div>
+
+
+        <div>
+
+            <label class="text-sm text-slate-400">
+                To
+            </label>
+
+            <input type="date" name="to" value="@ViewBag.To" class="w-full mt-1 bg-slate-800
+            border border-slate-700
+            rounded-lg p-2" />
+
+        </div>
+
+        <div class="flex items-end">
+
+            <button type="submit" class="w-full bg-blue-600
+                rounded-lg p-2">
+
+                Filter
+
+            </button>
+
+        </div>
+
+    </form>
+
+		</div>
 		<div class="overflow-x-auto">
 			<table class="w-full text-left text-xs">
 				<thead class="bg-slate-900 text-slate-400 border-b border-slate-700">

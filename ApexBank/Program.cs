@@ -24,7 +24,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 //2. Inject HttpClient
 builder.Services.AddHttpClient("BankApi", client =>
 {
-    client.BaseAddress = new Uri("https://localhost:7173/");
+    client.BaseAddress = new Uri("https://localhost:7179/");
 });
 
 builder.Services.AddScoped<IAuditService, AuditService>();
